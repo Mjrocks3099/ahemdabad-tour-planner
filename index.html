@@ -70,7 +70,7 @@
   </div>
 
   <!-- 💡 JavaScript -->
- <script>
+<script>
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   if (!isMobile) {
     document.getElementById('device-warning').classList.remove('hidden');
@@ -82,10 +82,33 @@
   const infoFrom = document.getElementById('info-from');
   const infoTo = document.getElementById('info-to');
 
+  // Helper to clean text
   function getAddress(val) {
     return encodeURIComponent(val.replace(/,/g, ''));
   }
 
+  // 📍 Ask user for GPS location
+  function getCurrentLocation(callback) {
+    if (!navigator.geolocation) {
+      alert("Your device does not support GPS or permission denied.");
+      callback(null);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        callback({ lat, lng });
+      },
+      () => {
+        alert("Unable to get location — using selected 'From' place.");
+        callback(null);
+      }
+    );
+  }
+
+  // Google Maps Route
   function openMaps() {
     const from = getAddress(fromSelect.value);
     const to = getAddress(toSelect.value);
@@ -96,38 +119,91 @@
     window.open(mapsUrl, '_blank');
   }
 
-  // Uber deep link
+  // 🚖 Uber deep link
   function openUber() {
-    const to = getAddress(toSelect.value);
-    const uberUrl = `uber://?action=setPickup&pickup=my_location&dropoff[formatted_address]=${to}`;
-    const uberWeb = `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[formatted_address]=${to}`;
-    window.location.href = uberUrl;
-    setTimeout(() => window.open(uberWeb, '_blank'), 1000); // fallback if not installed
+    if (confirm("📍 Use your GPS location as pickup?")) {
+      getCurrentLocation((loc) => {
+        const to = getAddress(toSelect.value);
+        let uberUrl;
+        if (loc) {
+          uberUrl = `uber://?action=setPickup&pickup[latitude]=${loc.lat}&pickup[longitude]=${loc.lng}&dropoff[formatted_address]=${to}`;
+        } else {
+          const from = getAddress(fromSelect.value);
+          uberUrl = `uber://?action=setPickup&pickup[formatted_address]=${from}&dropoff[formatted_address]=${to}`;
+        }
+        const uberWeb = uberUrl.replace("uber://", "https://m.uber.com/ul/");
+        window.location.href = uberUrl;
+        setTimeout(() => window.open(uberWeb, "_blank"), 1000);
+      });
+    } else {
+      const from = getAddress(fromSelect.value);
+      const to = getAddress(toSelect.value);
+      const uberUrl = `uber://?action=setPickup&pickup[formatted_address]=${from}&dropoff[formatted_address]=${to}`;
+      const uberWeb = `https://m.uber.com/ul/?action=setPickup&pickup[formatted_address]=${from}&dropoff[formatted_address]=${to}`;
+      window.location.href = uberUrl;
+      setTimeout(() => window.open(uberWeb, "_blank"), 1000);
+    }
   }
 
-  // Ola deep link
+  // 🚗 Ola deep link
   function openOla() {
-    const to = getAddress(toSelect.value);
-    const olaUrl = `olacabs://app/launch?drop_name=${to}`;
-    const olaWeb = `https://play.google.com/store/apps/details?id=com.olacabs.customer`;
-    window.location.href = olaUrl;
-    setTimeout(() => window.open(olaWeb, '_blank'), 1000);
+    if (confirm("📍 Use your GPS location as pickup?")) {
+      getCurrentLocation((loc) => {
+        const to = getAddress(toSelect.value);
+        let olaUrl;
+        if (loc) {
+          olaUrl = `olacabs://app/launch?pickup_lat=${loc.lat}&pickup_lng=${loc.lng}&drop_name=${to}`;
+        } else {
+          const from = getAddress(fromSelect.value);
+          olaUrl = `olacabs://app/launch?pickup_name=${from}&drop_name=${to}`;
+        }
+        const olaWeb = `https://play.google.com/store/apps/details?id=com.olacabs.customer`;
+        window.location.href = olaUrl;
+        setTimeout(() => window.open(olaWeb, "_blank"), 1000);
+      });
+    } else {
+      const from = getAddress(fromSelect.value);
+      const to = getAddress(toSelect.value);
+      const olaUrl = `olacabs://app/launch?pickup_name=${from}&drop_name=${to}`;
+      const olaWeb = `https://play.google.com/store/apps/details?id=com.olacabs.customer`;
+      window.location.href = olaUrl;
+      setTimeout(() => window.open(olaWeb, "_blank"), 1000);
+    }
   }
 
-  // Rapido deep link
+  // 🛵 Rapido deep link
   function openRapido() {
-    const to = getAddress(toSelect.value);
-    const rapidoUrl = `rapido://?drop_name=${to}`;
-    const rapidoWeb = `https://play.google.com/store/apps/details?id=com.rapido.passenger`;
-    window.location.href = rapidoUrl;
-    setTimeout(() => window.open(rapidoWeb, '_blank'), 1000);
+    if (confirm("📍 Use your GPS location as pickup?")) {
+      getCurrentLocation((loc) => {
+        const to = getAddress(toSelect.value);
+        let rapidoUrl;
+        if (loc) {
+          rapidoUrl = `rapido://?pickup_lat=${loc.lat}&pickup_lng=${loc.lng}&drop_name=${to}`;
+        } else {
+          const from = getAddress(fromSelect.value);
+          rapidoUrl = `rapido://?pickup_name=${from}&drop_name=${to}`;
+        }
+        const rapidoWeb = `https://play.google.com/store/apps/details?id=com.rapido.passenger`;
+        window.location.href = rapidoUrl;
+        setTimeout(() => window.open(rapidoWeb, "_blank"), 1000);
+      });
+    } else {
+      const from = getAddress(fromSelect.value);
+      const to = getAddress(toSelect.value);
+      const rapidoUrl = `rapido://?pickup_name=${from}&drop_name=${to}`;
+      const rapidoWeb = `https://play.google.com/store/apps/details?id=com.rapido.passenger`;
+      window.location.href = rapidoUrl;
+      setTimeout(() => window.open(rapidoWeb, "_blank"), 1000);
+    }
   }
 
+  // Event listeners
   document.getElementById('showRoute').addEventListener('click', openMaps);
   document.getElementById('bookUber').addEventListener('click', openUber);
   document.getElementById('bookOla').addEventListener('click', openOla);
   document.getElementById('bookRapido').addEventListener('click', openRapido);
 </script>
+
 
 
 </body>
