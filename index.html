@@ -171,12 +171,13 @@
     }
   }
 
-  // 🛵 Rapido deep link (fixed)
+ // 🛵 Rapido deep link (with fallback)
 function openRapido() {
   if (confirm("📍 Use your GPS location as pickup?")) {
     getCurrentLocation((loc) => {
       const to = getAddress(toSelect.value);
       const from = getAddress(fromSelect.value);
+
       let rapidoIntent = "";
 
       if (loc) {
@@ -185,16 +186,29 @@ function openRapido() {
         rapidoIntent = `intent://ride?pickup_name=${encodeURIComponent(from)}&drop_name=${encodeURIComponent(to)}#Intent;scheme=rapido;package=com.rapido.passenger;end`;
       }
 
-      // Open Rapido directly via Android Intent
-      window.location.href = rapidoIntent;
+      tryOpenRapido(rapidoIntent);
     });
   } else {
     const from = getAddress(fromSelect.value);
     const to = getAddress(toSelect.value);
     const rapidoIntent = `intent://ride?pickup_name=${encodeURIComponent(from)}&drop_name=${encodeURIComponent(to)}#Intent;scheme=rapido;package=com.rapido.passenger;end`;
-    window.location.href = rapidoIntent;
+    tryOpenRapido(rapidoIntent);
   }
 }
+
+// 🚀 Function to open Rapido app or fallback to Play Store
+function tryOpenRapido(intentUrl) {
+  const fallbackUrl = "https://play.google.com/store/apps/details?id=com.rapido.passenger";
+  
+  // Try opening the app
+  window.location.href = intentUrl;
+
+  // If user doesn’t have the app, fallback after delay
+  setTimeout(() => {
+    window.open(fallbackUrl, "_blank");
+  }, 1500);
+}
+
 
   // Event listeners
   document.getElementById('showRoute').addEventListener('click', openMaps);
