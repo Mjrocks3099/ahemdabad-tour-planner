@@ -171,31 +171,30 @@
     }
   }
 
-  // 🛵 Rapido deep link
-  function openRapido() {
-    if (confirm("📍 Use your GPS location as pickup?")) {
-      getCurrentLocation((loc) => {
-        const to = getAddress(toSelect.value);
-        let rapidoUrl;
-        if (loc) {
-          rapidoUrl = `rapido://?pickup_lat=${loc.lat}&pickup_lng=${loc.lng}&drop_name=${to}`;
-        } else {
-          const from = getAddress(fromSelect.value);
-          rapidoUrl = `rapido://?pickup_name=${from}&drop_name=${to}`;
-        }
-        const rapidoWeb = `https://play.google.com/store/apps/details?id=com.rapido.passenger`;
-        window.location.href = rapidoUrl;
-        setTimeout(() => window.open(rapidoWeb, "_blank"), 1000);
-      });
-    } else {
-      const from = getAddress(fromSelect.value);
+  // 🛵 Rapido deep link (fixed)
+function openRapido() {
+  if (confirm("📍 Use your GPS location as pickup?")) {
+    getCurrentLocation((loc) => {
       const to = getAddress(toSelect.value);
-      const rapidoUrl = `rapido://?pickup_name=${from}&drop_name=${to}`;
-      const rapidoWeb = `https://play.google.com/store/apps/details?id=com.rapido.passenger`;
-      window.location.href = rapidoUrl;
-      setTimeout(() => window.open(rapidoWeb, "_blank"), 1000);
-    }
+      const from = getAddress(fromSelect.value);
+      let rapidoIntent = "";
+
+      if (loc) {
+        rapidoIntent = `intent://ride?pickup_lat=${loc.lat}&pickup_lng=${loc.lng}&drop_name=${encodeURIComponent(to)}#Intent;scheme=rapido;package=com.rapido.passenger;end`;
+      } else {
+        rapidoIntent = `intent://ride?pickup_name=${encodeURIComponent(from)}&drop_name=${encodeURIComponent(to)}#Intent;scheme=rapido;package=com.rapido.passenger;end`;
+      }
+
+      // Open Rapido directly via Android Intent
+      window.location.href = rapidoIntent;
+    });
+  } else {
+    const from = getAddress(fromSelect.value);
+    const to = getAddress(toSelect.value);
+    const rapidoIntent = `intent://ride?pickup_name=${encodeURIComponent(from)}&drop_name=${encodeURIComponent(to)}#Intent;scheme=rapido;package=com.rapido.passenger;end`;
+    window.location.href = rapidoIntent;
   }
+}
 
   // Event listeners
   document.getElementById('showRoute').addEventListener('click', openMaps);
