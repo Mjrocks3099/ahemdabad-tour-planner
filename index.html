@@ -70,35 +70,65 @@
   </div>
 
   <!-- 💡 JavaScript -->
-  <script>
-    // Device detection for desktop
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if (!isMobile) {
-      document.getElementById('device-warning').classList.remove('hidden');
-    }
+ <script>
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (!isMobile) {
+    document.getElementById('device-warning').classList.remove('hidden');
+  }
 
-    const fromSelect = document.getElementById('from');
-    const toSelect = document.getElementById('to');
-    const routeInfo = document.getElementById('route-info');
-    const infoFrom = document.getElementById('info-from');
-    const infoTo = document.getElementById('info-to');
+  const fromSelect = document.getElementById('from');
+  const toSelect = document.getElementById('to');
+  const routeInfo = document.getElementById('route-info');
+  const infoFrom = document.getElementById('info-from');
+  const infoTo = document.getElementById('info-to');
 
-    // Function to open Google Maps direction
-    function openRoute() {
-      const from = encodeURIComponent(fromSelect.value);
-      const to = encodeURIComponent(toSelect.value);
-      const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${from}&destination=${to}`;
-      infoFrom.textContent = fromSelect.options[fromSelect.selectedIndex].text;
-      infoTo.textContent = toSelect.options[toSelect.selectedIndex].text;
-      routeInfo.classList.remove('hidden');
-      window.open(mapsUrl, '_blank');
-    }
+  function getAddress(val) {
+    return encodeURIComponent(val.replace(/,/g, ''));
+  }
 
-    document.getElementById('showRoute').addEventListener('click', openRoute);
-    document.getElementById('bookUber').addEventListener('click', openRoute);
-    document.getElementById('bookOla').addEventListener('click', openRoute);
-    document.getElementById('bookRapido').addEventListener('click', openRoute);
-  </script>
+  function openMaps() {
+    const from = getAddress(fromSelect.value);
+    const to = getAddress(toSelect.value);
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${from}&destination=${to}`;
+    infoFrom.textContent = fromSelect.options[fromSelect.selectedIndex].text;
+    infoTo.textContent = toSelect.options[toSelect.selectedIndex].text;
+    routeInfo.classList.remove('hidden');
+    window.open(mapsUrl, '_blank');
+  }
+
+  // Uber deep link
+  function openUber() {
+    const to = getAddress(toSelect.value);
+    const uberUrl = `uber://?action=setPickup&pickup=my_location&dropoff[formatted_address]=${to}`;
+    const uberWeb = `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[formatted_address]=${to}`;
+    window.location.href = uberUrl;
+    setTimeout(() => window.open(uberWeb, '_blank'), 1000); // fallback if not installed
+  }
+
+  // Ola deep link
+  function openOla() {
+    const to = getAddress(toSelect.value);
+    const olaUrl = `olacabs://app/launch?drop_name=${to}`;
+    const olaWeb = `https://play.google.com/store/apps/details?id=com.olacabs.customer`;
+    window.location.href = olaUrl;
+    setTimeout(() => window.open(olaWeb, '_blank'), 1000);
+  }
+
+  // Rapido deep link
+  function openRapido() {
+    const to = getAddress(toSelect.value);
+    const rapidoUrl = `rapido://?drop_name=${to}`;
+    const rapidoWeb = `https://play.google.com/store/apps/details?id=com.rapido.passenger`;
+    window.location.href = rapidoUrl;
+    setTimeout(() => window.open(rapidoWeb, '_blank'), 1000);
+  }
+
+  document.getElementById('showRoute').addEventListener('click', openMaps);
+  document.getElementById('bookUber').addEventListener('click', openUber);
+  document.getElementById('bookOla').addEventListener('click', openOla);
+  document.getElementById('bookRapido').addEventListener('click', openRapido);
+</script>
+
 
 </body>
 </html>
