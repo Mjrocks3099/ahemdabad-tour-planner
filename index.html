@@ -145,22 +145,26 @@
     }
   }
 
-  // 🚗 Ola deep link (auto-GPS, with fallback)
+// 🚗 Ola deep link (auto-GPS, with fallback)
 function openOla() {
   const from = getAddress(fromSelect.value);
   const to = getAddress(toSelect.value);
 
-  // Ola deep link (will use current GPS in app automatically)
-  const olaUrl = `olacabs://app/launch?pickup_name=${encodeURIComponent(from)}&drop_name=${encodeURIComponent(to)}`;
+  // Ola works better with plain text (not encoded)
+  const olaUrl = `olacabs://app/launch?pickup_name=${from}&drop_name=${to}`;
   const olaWeb = "https://play.google.com/store/apps/details?id=com.olacabs.customer";
 
-  // Try opening Ola app
-  window.location.href = olaUrl;
+  try {
+    // Try opening Ola app
+    window.location.href = olaUrl;
 
-  // Fallback: open Play Store if app not installed
-  setTimeout(() => {
+    // Fallback: open Play Store if app not installed
+    setTimeout(() => {
+      window.open(olaWeb, "_blank");
+    }, 1500);
+  } catch (e) {
     window.open(olaWeb, "_blank");
-  }, 1500);
+  }
 }
 
  // 🛵 Rapido deep link (with fallback)
