@@ -119,31 +119,64 @@
     window.open(mapsUrl, '_blank');
   }
 
-  // 🚖 Uber deep link
-  function openUber() {
-    if (confirm("📍 Use your GPS location as pickup?")) {
-      getCurrentLocation((loc) => {
-        const to = getAddress(toSelect.value);
-        let uberUrl;
-        if (loc) {
-          uberUrl = `uber://?action=setPickup&pickup[latitude]=${loc.lat}&pickup[longitude]=${loc.lng}&dropoff[formatted_address]=${to}`;
-        } else {
-          const from = getAddress(fromSelect.value);
-          uberUrl = `uber://?action=setPickup&pickup[formatted_address]=${from}&dropoff[formatted_address]=${to}`;
-        }
-        const uberWeb = uberUrl.replace("uber://", "https://m.uber.com/ul/");
-        window.location.href = uberUrl;
-        setTimeout(() => window.open(uberWeb, "_blank"), 1000);
-      });
-    } else {
-      const from = getAddress(fromSelect.value);
+  // // 🚖 Uber deep link
+  // function openUber() {
+  //   if (confirm("📍 Use your GPS location as pickup?")) {
+  //     getCurrentLocation((loc) => {
+  //       const to = getAddress(toSelect.value);
+  //       let uberUrl;
+  //       if (loc) {
+  //         uberUrl = `uber://?action=setPickup&pickup[latitude]=${loc.lat}&pickup[longitude]=${loc.lng}&dropoff[formatted_address]=${to}`;
+  //       } else {
+  //         const from = getAddress(fromSelect.value);
+  //         uberUrl = `uber://?action=setPickup&pickup[formatted_address]=${from}&dropoff[formatted_address]=${to}`;
+  //       }
+  //       const uberWeb = uberUrl.replace("uber://", "https://m.uber.com/ul/");
+  //       window.location.href = uberUrl;
+  //       setTimeout(() => window.open(uberWeb, "_blank"), 1000);
+  //     });
+  //   } else {
+  //     const from = getAddress(fromSelect.value);
+  //     const to = getAddress(toSelect.value);
+  //     const uberUrl = `uber://?action=setPickup&pickup[formatted_address]=${from}&dropoff[formatted_address]=${to}`;
+  //     const uberWeb = `https://m.uber.com/ul/?action=setPickup&pickup[formatted_address]=${from}&dropoff[formatted_address]=${to}`;
+  //     window.location.href = uberUrl;
+  //     setTimeout(() => window.open(uberWeb, "_blank"), 1000);
+  //   }
+  // }
+
+  // 🚖 Uber deep link (fixed GPS timing)
+function openUber() {
+  if (confirm("📍 Use your GPS location as pickup?")) {
+    // Only proceed after GPS is ready
+    getCurrentLocation((loc) => {
       const to = getAddress(toSelect.value);
-      const uberUrl = `uber://?action=setPickup&pickup[formatted_address]=${from}&dropoff[formatted_address]=${to}`;
-      const uberWeb = `https://m.uber.com/ul/?action=setPickup&pickup[formatted_address]=${from}&dropoff[formatted_address]=${to}`;
+      let uberUrl;
+      if (loc && loc.lat && loc.lng) {
+        uberUrl = `uber://?action=setPickup&pickup[latitude]=${loc.lat}&pickup[longitude]=${loc.lng}&dropoff[formatted_address]=${to}`;
+      } else {
+        // fallback if GPS fails
+        const from = getAddress(fromSelect.value);
+        uberUrl = `uber://?action=setPickup&pickup[formatted_address]=${from}&dropoff[formatted_address]=${to}`;
+      }
+
+      const uberWeb = uberUrl.replace("uber://", "https://m.uber.com/ul/");
+      // open Uber
       window.location.href = uberUrl;
+      // fallback after short delay if app not installed
       setTimeout(() => window.open(uberWeb, "_blank"), 1000);
-    }
+    });
+  } else {
+    // Cancel path (no GPS) — keep original behavior
+    const from = getAddress(fromSelect.value);
+    const to = getAddress(toSelect.value);
+    const uberUrl = `uber://?action=setPickup&pickup[formatted_address]=${from}&dropoff[formatted_address]=${to}`;
+    const uberWeb = `https://m.uber.com/ul/?action=setPickup&pickup[formatted_address]=${from}&dropoff[formatted_address]=${to}`;
+    window.location.href = uberUrl;
+    setTimeout(() => window.open(uberWeb, "_blank"), 1000);
   }
+}
+
 
 // 🚗 Ola deep link (auto-GPS, with fallback)
 function openOla() {
